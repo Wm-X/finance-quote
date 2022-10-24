@@ -271,8 +271,15 @@ sub alphavantage {
             if ( $currencies_by_suffix{$suffix} ) {
                 $info{ $stock, 'currency' } = $currencies_by_suffix{$suffix};
 
-                # divide GBP quotes by 100
-                if ( ($info{ $stock, 'currency' } eq 'GBP') || ($info{$stock,'currency'} eq 'GBX') ) {
+                # divide *GBX* quotes by 100      was: # divide GBP quotes by 100
+                # except the code actually divided *both* GBP and GBX by 100, which makes no sense at all
+                # was: if ( ($info{ $stock, 'currency' } eq 'GBP') || ($info{$stock,'currency'} eq 'GBX') ) {
+                # the code above divides *both* GBP and GBX by 100 which makes no sense at all
+                # divide GBX (i.e. prices reported as 999 pennys instead of 9.99) quotes by 100 do *NOT* divide GBP quotes (i.e. prices reported as 9.99) by 100
+                # dunno why someone thought *both* GBP and GBX should be divided by 100
+                # this has been known about by GnuCash folks for years, I just got around to making the change here rather than editing the file myself every time
+                # feel free to get rid of the commentarty once this is fixed
+                if ($info{$stock,'currency'} eq 'GBX') {
                     foreach my $field ( $quoter->default_currency_fields ) {
                         next unless ( $info{ $stock, $field } );
                         $info{ $stock, $field } =
